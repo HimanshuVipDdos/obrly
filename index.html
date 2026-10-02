@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Study With Me — Overlay Generator</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0f1e;color:#f1f5f9;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem}
+.card{background:#111827;border:1px solid rgba(249,115,22,0.25);border-radius:20px;padding:2rem 2.5rem;width:100%;max-width:520px}
+.logo{text-align:center;margin-bottom:1.8rem}
+.logo h1{font-size:1.6rem;font-weight:800;color:#fff}
+.logo h1 span{color:#f97316}
+.logo p{font-size:.85rem;color:#64748b;margin-top:4px}
+.field{margin-bottom:1.2rem}
+label{display:block;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#f97316;margin-bottom:6px}
+input,textarea,select{width:100%;background:#1e293b;border:1px solid rgba(255,255,255,0.08);color:#fff;font-size:14px;padding:10px 14px;border-radius:10px;outline:none;font-family:inherit;transition:border-color .2s}
+input:focus,textarea:focus,select:focus{border-color:#f97316}
+textarea{resize:vertical;min-height:100px;line-height:1.6}
+select option{background:#1e293b}
+.hint{font-size:11px;color:#475569;margin-top:4px}
+.btn{width:100%;background:#f97316;color:#fff;border:none;padding:13px;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;margin-top:.5rem;transition:background .2s;letter-spacing:.5px}
+.btn:hover{background:#ea6e10}
+.result{display:none;margin-top:1.5rem;background:#0f172a;border:1px solid rgba(34,197,94,0.3);border-radius:12px;padding:1.2rem 1.4rem}
+.result-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#22c55e;margin-bottom:8px}
+.link-box{display:flex;gap:8px;align-items:center}
+.link-text{flex:1;background:#1e293b;border:1px solid rgba(255,255,255,0.08);color:#94a3b8;font-size:12px;padding:8px 12px;border-radius:8px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-family:monospace}
+.copy-btn{background:#22c55e;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .2s}
+.copy-btn:hover{background:#16a34a}
+.open-btn{display:block;text-align:center;margin-top:10px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:#22c55e;text-decoration:none;padding:9px;border-radius:8px;font-size:13px;font-weight:700;transition:background .2s}
+.open-btn:hover{background:rgba(34,197,94,0.2)}
+.obs-tip{margin-top:10px;font-size:11px;color:#475569;line-height:1.6}
+.obs-tip b{color:#94a3b8}
+.divider{height:1px;background:rgba(255,255,255,0.05);margin:1.5rem 0}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">
+    <h1>Study With Me <span>Overlay</span></h1>
+    <p>Apna details bharo — personal OBS overlay link milega</p>
+  </div>
+
+  <div class="field">
+    <label>Tumhara Naam / Channel Name</label>
+    <input type="text" id="f-name" placeholder="e.g. Rahul Kumar" value="">
+  </div>
+
+  <div class="field">
+    <label>Session Ka Naam</label>
+    <input type="text" id="f-session" placeholder="e.g. SSC CGL Morning Study" value="">
+  </div>
+
+  <div class="field">
+    <label>Brand / Platform Name</label>
+    <input type="text" id="f-brand" placeholder="e.g. Sarvodaya Adhyeta" value="Sarvodaya Adhyeta">
+  </div>
+
+  <div class="field">
+    <label>Timer Mode</label>
+    <select id="f-timer">
+      <option value="stopwatch">Stopwatch (open-ended)</option>
+      <option value="25">Pomodoro — 25 min</option>
+      <option value="50">Focus — 50 min</option>
+      <option value="90">Session — 90 min</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label>Aaj Ke Tasks (ek line = ek task)</label>
+    <textarea id="f-tasks" placeholder="Reasoning — 30 questions&#10;English Reading Comprehension&#10;GK Current Affairs revision&#10;Math — Percentage chapter"></textarea>
+    <div class="hint">Max 6 tasks recommend kiye hain overlay mein fit rehne ke liye</div>
+  </div>
+
+  <button class="btn" onclick="generate()">🎬 Mera Overlay Link Banao</button>
+
+  <div class="result" id="result">
+    <div class="result-label">✅ Tera Personal Overlay Ready Hai!</div>
+    <div class="link-box">
+      <div class="link-text" id="gen-link"></div>
+      <button class="copy-btn" onclick="copyLink()">Copy</button>
+    </div>
+    <a class="open-btn" id="open-link" href="#" target="_blank">🔗 Overlay Preview Karo</a>
+    <div class="obs-tip">
+      <b>OBS mein kaise lagao:</b><br>
+      Sources → + → Browser Source → URL mein yeh link paste karo → Width: 1920, Height: 1080
+    </div>
+  </div>
+</div>
+
+<script>
+function generate() {
+  const name = document.getElementById('f-name').value.trim();
+  const session = document.getElementById('f-session').value.trim();
+  const brand = document.getElementById('f-brand').value.trim();
+  const timer = document.getElementById('f-timer').value;
+  const tasks = document.getElementById('f-tasks').value.trim();
+
+  if (!session) { alert('Session ka naam zaroor bharo!'); return; }
+
+  const base = window.location.origin + window.location.pathname.replace('index.html','') + 'overlay.html';
+  const params = new URLSearchParams();
+  if (name) params.set('name', name);
+  params.set('session', session);
+  if (brand) params.set('brand', brand);
+  params.set('timer', timer);
+  if (tasks) params.set('tasks', tasks);
+
+  const url = base + '?' + params.toString();
+
+  document.getElementById('gen-link').textContent = url;
+  document.getElementById('open-link').href = url;
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('result').scrollIntoView({behavior:'smooth'});
+}
+
+function copyLink() {
+  const txt = document.getElementById('gen-link').textContent;
+  navigator.clipboard.writeText(txt).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+</script>
+</body>
+</html>
